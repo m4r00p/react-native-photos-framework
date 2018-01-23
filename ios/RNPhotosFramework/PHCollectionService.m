@@ -186,9 +186,25 @@ static id ObjectOrNull(id object)
             
         }
     }
-
-    [albumDictionary setObject:collection.localizedTitle forKey:@"title"];
-    [albumDictionary setObject:collection.localIdentifier forKey:@"localIdentifier"];
+    
+    
+    if(collection.localizedTitle ==  nil || [collection.localizedTitle isKindOfClass:[NSNull null]])
+    {
+      [albumDictionary setObject:collection.localizedTitle forKey:@"title"];
+    }
+    else
+    {
+      [albumDictionary setObject:@"" forKey:@"title"];
+    }
+    
+    if(collection.localIdentifier ==  nil || [collection.localIdentifier isKindOfClass:[NSNull null]])
+    {
+        [albumDictionary setObject:collection.localIdentifier forKey:@"localIdentifier"];
+    }
+    else
+    {
+        [albumDictionary setObject:@"unknownLocalId" forKey:@"localIdentifier"];
+    }
     
     NSMutableArray *permittedOperations = [NSMutableArray arrayWithCapacity:7];
     for(int i = 1; i <= 7; i++) {
