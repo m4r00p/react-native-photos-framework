@@ -17,6 +17,10 @@ static id ObjectOrNull(id object)
     return object ?: [NSNull null];
 }
 
+static NSString* notNilString(id s, NSString *defaultValue) {
+    return (s == nil || ([s class] == [NSNull class])) ? defaultValue : s;
+}
+
 +(PHAssetCollection *) getAssetCollectionForParams:(NSDictionary *)params {
     NSString * albumLocalIdentifier = [RCTConvert NSString:params[@"albumLocalIdentifier"]];
     if(albumLocalIdentifier) {
@@ -181,31 +185,20 @@ static id ObjectOrNull(id object)
                 BOOL assetDisplayStartToEnd = [RCTConvert BOOL:assetFetchParams[@"assetDisplayStartToEnd"]];
                 BOOL assetDisplayBottomUp = [RCTConvert BOOL:assetFetchParams[@"assetDisplayBottomUp"]];
                 NSArray<NSDictionary *> *previewAssets = [PHAssetsService assetsArrayToUriArray:[PHAssetsService getAssetsForFetchResult:assets startIndex:0 endIndex:(numberOfPreviewAssets-1) assetDisplayStartToEnd:assetDisplayStartToEnd andAssetDisplayBottomUp:assetDisplayBottomUp] andincludeMetadata:NO andIncludeAssetResourcesMetadata:resourcesMetadata];
-                [albumDictionary setObject:previewAssets forKey:@"previewAssets"];
+                if (previewAssets != nil) {
+                  [albumDictionary setObject:previewAssets forKey:@"previewAssets"];
+                }
             }
             
         }
     }
+
+    [albumDictionary setObject: notNilString(collection.localizedTitle, @"")
+                        forKey: @"title"];
     
-    
-    if(collection.localizedTitle ==  nil || [collection.localizedTitle isKindOfClass:[NSNull null]])
-    {
-      [albumDictionary setObject:collection.localizedTitle forKey:@"title"];
-    }
-    else
-    {
-      [albumDictionary setObject:@"" forKey:@"title"];
-    }
-    
-    if(collection.localIdentifier ==  nil || [collection.localIdentifier isKindOfClass:[NSNull null]])
-    {
-        [albumDictionary setObject:collection.localIdentifier forKey:@"localIdentifier"];
-    }
-    else
-    {
-        [albumDictionary setObject:@"unknownLocalId" forKey:@"localIdentifier"];
-    }
-    
+    [albumDictionary setObject: notNilString(collection.localIdentifier, @"unknownLocalId")
+                        forKey: @"localIdentifier"];
+  
     NSMutableArray *permittedOperations = [NSMutableArray arrayWithCapacity:7];
     for(int i = 1; i <= 7; i++) {
         [permittedOperations addObject:@([collection canPerformEditOperation:i])];
